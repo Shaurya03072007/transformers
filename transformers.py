@@ -85,7 +85,7 @@ while True:
             a_pos_enc[i][j] = math.sin(exp) if j % 2 == 0 else math.cos(exp)
             a_dense_emb[i][j] = ar[j]
     X = a_dense_emb + a_pos_enc
-
+    print(X)
     # Transformer attention weights
     paths = {"WV": "WV.npy", "WK": "WK.npy", "WQ": "WQ.npy", "W0": "W0.npy"}
     if all(os.path.exists(p) for p in paths.values()):
