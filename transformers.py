@@ -182,22 +182,19 @@ while counting==0:
     pred_index = np.argmax(probs)
     predicted_word = vocab[pred_index]
     print(predicted_word)
-    def layernorm_fnn_training(srr, gamma_1, beta_1,dlbydout):
+    def layernorm_fnn_training(srr, gamma_1, beta_1,dlbydout,choice):
         E = 1e-9
         mean = np.mean(srr)
         variance = np.var(srr)
         for i in range(len(gamma_1)):
             gamma_1[i] = gamma_1[i] - dlbydout * (learningrate * ((srr[i] - mean) / (np.sqrt(variance + E))))
             beta_1[i] = beta_1[i] - dlbydout * (learningrate * beta_1[i])
-        np.save(gamma_file1, gamma_1)
-        np.save(beta_file1, beta_1)
-        
-    def fnn_training(inputs , weights , biases , dlbydout):
-        i_len , w_len , b_len = len(inputs) , len(weights) , len(biases)
-        for i in range(i_len):
-            weight = w_len[i]
-            for j in range(len(weight)):
-                print()
+        if choice == 0:
+            np.save(gamma_file1, gamma_1)
+            np.save(beta_file1, beta_1)
+        elif choice == 1:
+            np.save(gamma_file, gamma_1)
+            np.save(beta_file, beta_1)    
 
     def W2_training(dffnout):
         for i in range(len(FFN_output)):
@@ -215,7 +212,7 @@ while counting==0:
         for i in range(len(dffnhidden)):
             for j in range(len(W1)):
                 for k in range(len(W1[0])):
-                     dL_dffnout_i1 = dffnhidden[i][k]      # ∂L/∂FFN_output[i][1]
+                     dL_dffnout_i1 = dffnhidden[i][k]         # ∂L/∂FFN_output[i][1]
                      h_i0 = Layer_norm[i][j]                  # FFN_hidden[i][0] is the input to W2[0][1]
                      grad = dL_dffnout_i1 * h_i0              # chain rule
                      W1[j][k] -= learningrate * grad
@@ -227,8 +224,7 @@ while counting==0:
     dl_by_dlogits = probs - one_hot[target_index]
     dl_by_dsentence = V1.T @ dl_by_dlogits
     dl_by_dffn_layernorm = dl_by_dsentence * 1/len(a_words)
-    for i in range(len(Layer_norm_fnn)):
-          layernorm_fnn_training(Layer_norm_fnn[i] , gamma1 , beta1 , dl_by_dffn_layernorm[i])
+    
     #print(W2)
     dffn_layernorm_by_dfnn_layeradd = np.array([LayerNormalisation(Layer_add_fnn[i], gamma1 , beta1 ,1) for i in range(len(Layer_add_fnn))])
     #dl_by_dfnn_layeradd = np.array([i @ dl_by_dffn_layernorm for i in dffn_layernorm_by_dfnn_layeradd])
@@ -244,12 +240,19 @@ while counting==0:
     #print()
     #print(W1)
     #print()
+    print(dl_by_dffn_layernorm)
+    print(dl_by_drelu)
+    
+    for i in range(len(Layer_norm_fnn)):
+          layernorm_fnn_training(Layer_norm_fnn[i] , gamma1 , beta1 , dl_by_dffn_layernorm[i],1)
     W2_training(dl_by_dfnnout)
     W1_training(dl_by_drelu)
+    for i in range(len(Layer_norm)):
+          temp = np.mean(dl_by_drelu
+          layernorm_fnn_training(Layer_norm[i],gamma,beta,dl_by_drelu[i],0)
     #print(W2)
     print(counting)
     counting = counting+1
     #print()
     #print(dl_by_dfnn_layeradd)
-
     #for i in range(len(Layer_add_fnn)): layernorm_fnn_training(Layer_add_fnn[i],gamma1,beta1,dl_by_dout) 
