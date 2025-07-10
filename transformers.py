@@ -2,7 +2,7 @@ import numpy as np
 import os
 import math
 counting = 0
-while True:
+while counting==0:
     # Define softmax function
     softmax = lambda x: np.exp(x - np.max(x)) / np.sum(np.exp(x - np.max(x)))
 
@@ -85,7 +85,7 @@ while True:
             a_pos_enc[i][j] = math.sin(exp) if j % 2 == 0 else math.cos(exp)
             a_dense_emb[i][j] = ar[j]
     X = a_dense_emb + a_pos_enc
-    print(X)
+
     # Transformer attention weights
     paths = {"WV": "WV.npy", "WK": "WK.npy", "WQ": "WQ.npy", "W0": "W0.npy"}
     if all(os.path.exists(p) for p in paths.values()):
@@ -144,7 +144,8 @@ while True:
         np.save(ffn_b1_file, b1)
         np.save(ffn_w2_file, W2)
         np.save(ffn_b2_file, b2)
-    FFN_hidden = np.array([np.maximum(0, x @ W1 + b1) for x in Layer_norm])
+    in_for_relu = np.array([ x @ W1 + b1 for x in Layer_norm])
+    FFN_hidden = np.array([np.maximum(0, x) for x in in_for_relu])
     FFN_output = np.array([x @ W2 + b2 for x in FFN_hidden])
 
     gamma_file1, beta_file1 = "gamma1.npy", "beta1.npy"
@@ -210,7 +211,18 @@ while True:
                       #print(W2[j][k])
         np.save(ffn_w2_file, W2)
         np.save(ffn_b2_file, b2)
-        
+    def W1_training(dffnhidden):
+        for i in range(len(dffnhidden)):
+            for j in range(len(W1)):
+                for k in range(len(W1[0])):
+                     dL_dffnout_i1 = dffnhidden[i][k]      # ∂L/∂FFN_output[i][1]
+                     h_i0 = Layer_norm[i][j]                  # FFN_hidden[i][0] is the input to W2[0][1]
+                     grad = dL_dffnout_i1 * h_i0              # chain rule
+                     W1[j][k] -= learningrate * grad
+                     b1[k] -= learningrate * dL_dffnout_i1
+                      #print(W2[j][k])
+        np.save(ffn_w1_file, W1)
+        np.save(ffn_b1_file, b1)
     dl_by_dout = -(1/(probs[target_index]*np.log(10)))
     dl_by_dlogits = probs - one_hot[target_index]
     dl_by_dsentence = V1.T @ dl_by_dlogits
@@ -222,18 +234,21 @@ while True:
     #dl_by_dfnn_layeradd = np.array([i @ dl_by_dffn_layernorm for i in dffn_layernorm_by_dfnn_layeradd])
     dl_by_dfnn_layeradd = dffn_layernorm_by_dfnn_layeradd * dl_by_dffn_layernorm
     dl_by_dfnnout = dl_by_dfnn_layeradd * 1
+    dl_by_dfnnhidden = dl_by_dfnnout @ W2.T
+    dl_by_drelu = dl_by_dfnnhidden * (FFN_hidden > 0).astype(float)
+    #print(dl_by_drelu)
     #print(len(W2))
-    #print(dl_by_dfnnout)
+    #print(dl_by_drelu)
     #print()
-    #print(FFN_hidden)
+    #print(Layer_norm)
     #print()
-    #print(W2)
+    #print(W1)
     #print()
     W2_training(dl_by_dfnnout)
+    W1_training(dl_by_drelu)
     #print(W2)
     print(counting)
-    counting=counting+1
-    dl_by_w21 = dl_by_dfnnout * np.array([x @ W2 + b2 for x in FFN_hidden])
+    counting = counting+1
     #print()
     #print(dl_by_dfnn_layeradd)
 
