@@ -5,16 +5,53 @@ counting = 0
 input1 = [
     "i am", "they are", "she is", "we are", "you are", "he is",
     "it is", "i was", "they were", "we will", "you will", "he was",
-    "she was", "i will", "they will", "we were", "i am", "she is",
-    "you are", "he is"
+    "she was", "i will", "they will", "we were", "he is not here",
+    "we are going to", "you might be", "they could be",
+    "i should have been", "you would be", "he shall be walking",
+    "they will have been", "we might have been", "he was going to be",
+    "she is currently", "i am still", "they are definitely", "you were probably",
+    "we could have", "he will likely", "she might", "i will probably",
+    "they were already", "we are soon", "you are still", "he was just",
+    "she will surely", "i have been", "you had been", "he could be",
+    "they might", "we were likely", "i was definitely", "she was just",
+    "you are going to", "they have been", "we might be", "i could be",
+    "she might have", "you shall be", "they are going to", "he was planning to",
+    "we will be", "i am about to", "you were supposed to", "she was about to",
+    "they are about to", "we are ready to", "he is expected to", "she is trying to",
+    "you might want to", "i feel like", "they seem to be", "we hope to",
+    "he pretends to", "she wants to", "i think i will", "you think you will",
+    "they believe they will", "we assume we are", "he guesses he will", "she imagines she will",
+    "i pretend to", "you imagine you will", "they plan to", "we are planning to",
+    "he has decided to", "she intends to", "i am learning to", "you are starting to",
+    "they are beginning to", "we are trying to", "he wants to start", "she is ready to",
+    "i feel ready to", "you are expected to", "they are willing to", "we are prepared to",
+    "he is committed to", "she is determined to", "i hope to", "you plan to",
+    "they should", "we could", "he must", "she might want to",
+    "i am going to", "you are going to", "they are going to", "we are going to"
 ]
 
 output1 = [
     "sleeping", "playing", "dancing", "walking", "talking", "eating",
     "drawing", "reading", "coding", "running", "jumping", "writing",
-    "building", "painting", "traveling", "learning", "reading", "talking",
-    "dancing", "walking"
+    "building", "painting", "traveling", "learning", "talking",
+    "dancing", "walking", "sleeping",
+    "reading", "coding", "running", "jumping", "writing", "building",
+    "painting", "traveling", "learning", "reading",
+    "talking", "dancing", "walking", "sleeping", "playing", "dancing",
+    "walking", "talking", "eating", "drawing", "reading", "coding",
+    "running", "jumping", "writing", "building", "painting", "traveling",
+    "learning", "reading", "talking", "dancing", "walking", "sleeping",
+    "playing", "dancing", "walking", "talking", "eating", "drawing",
+    "reading", "coding", "running", "jumping", "writing", "building",
+    "painting", "traveling", "learning", "reading", "talking", "dancing",
+    "walking", "sleeping", "playing", "dancing", "walking", "talking",
+    "eating", "drawing", "reading", "coding", "running", "jumping",
+    "writing", "building", "painting", "traveling", "learning", "reading",
+    "talking", "dancing", "walking", "sleeping", "playing", "dancing",
+    "walking", "talking", "eating", "drawing"
 ]
+#input1 = ["i am", "you are", "they are"]
+#output1 = ["sleeping", "eating", "coding"]
 embedding_dim = 512
 paths = {"WV": "WV.npy", "WK": "WK.npy", "WQ": "WQ.npy", "W0": "W0.npy"}
 if all(os.path.exists(p) for p in paths.values()):
@@ -45,10 +82,11 @@ if os.path.exists(gamma_file1) and os.path.exists(beta_file1):
         gamma1 = np.load(gamma_file1)
         beta1 = np.load(beta_file1)
         
-while counting==0:
-  counting = 1
+#while counting==0:
+  #counting = 1
 while True:
-  for inpput in range(len(input1)):  
+  #inputs =  np.random.permutation(len(input1)-1)
+  for inpput in range(len(input1)):       
     # Define softmax function
     def clip_gradient(grad, threshold=1.0):
         norm = np.linalg.norm(grad)
@@ -87,56 +125,21 @@ while True:
                 )
             return d_y_dx
     # Sample dataset with 20 vocabulary words and input sentences
-    output1 = [
-    "sleeping", "playing", "dancing", "walking", "talking", "eating",
-    "drawing", "reading", "coding", "running", "jumping", "writing",
-    "building", "painting", "traveling", "learning", "reading", "talking",
-    "dancing", "walking"
-]
-    arr = [
-    # Pronouns
-    "i", "you", "he", "she", "it", "we", "they",
-
-    # Verbs (to be)
-    "am", "is", "are", "was", "were", "be", "being", "been",
-
-    # Helping Verbs / Modals
-    "will", "shall", "should", "would", "can", "could", "may", "might", "must", "do", "does", "did",
-
-    # Actions (base & -ing)
-    "run", "running", "walk", "walking", "eat", "eating", "sleep", "sleeping","painting","traveling",
-    "read", "reading", "write", "writing", "sing", "singing", "dance", "dancing","building", "learning",
-    "cook", "cooking", "jump", "jumping", "talk", "talking", "play", "playing","coding",
-    "swim", "swimming", "drive", "driving", "study", "studying", "work", "working","drawing",
-
-    # Tenses / Time
-    "now", "today", "tomorrow", "yesterday", "morning", "night", "evening", "afternoon",
-
-    # Conjunctions / Prepositions
-    "in", "on", "at", "with", "to", "from", "for", "about", "before", "after", "while", "during",
-
-    # Objects / Nouns
-    "book", "pen", "paper", "laptop", "phone", "car", "bike", "bus", "train", "school", "college",
-    "teacher", "student", "dog", "cat", "ball", "game", "movie", "music", "food", "water", "bed",
-    "house", "home", "room", "park", "garden", "road", "beach", "market", "shop", "city", "village",
-
-    # Adjectives
-    "big", "small", "fast", "slow", "new", "old", "hot", "cold", "happy", "sad", "angry", "tired",
-
-    # Articles / Misc
-    "a", "an", "the", "and", "but", "or", "because", "if", "then", "so", "not", "yes", "no",
-
-    # Additional
-    "<PAD>", "<UNK>", "<START>", "<END>"
-    ]
-
-    
+    arr = ['<END>', '<PAD>', '<START>', '<UNK>', 'a', 'about', 'after', 'afternoon', 'already', 'am', 'an', 'and', 'angry', 'are', "aren't", 'assume', 'at', 'ball', 'be', 'beach', 'because', 'bed', 'been', 'before',
+           'beginning', 'being', 'believe', 'big', 'bike', 'book', 'build', 'building', 'bus', 'but', 'can', "can't", 'car', 'cat', 'city', 'code', 'coding', 'cold', 'college', 'committed', 'cook', 'cooking', 'could',
+           "couldn't", 'currently', 'dance', 'dancing', 'decided', 'definitely', 'determined', 'did', "didn't", 'do', 'does', "doesn't", 'dog', "don't", 'draw', 'drawing', 'drive', 'driving', 'during', 'eat', 'eating',
+           'evening', 'expected', 'fast', 'feel', 'food', 'for', 'from', 'game', 'garden', 'going', 'guesses', 'had', 'happy', 'has', 'have', 'having', 'he', "he's", 'her', 'here', 'him', 'his', 'home', 'hope', 'hot',
+           'house', 'i', "i'm", "i've", 'if', 'imagine', 'imagines', 'in', 'intends', 'is', "isn't", 'it', "it's", 'its', 'jump', 'jumping', 'just', 'laptop', 'learn', 'learning', 'like', 'likely', 'market', 'may', 'me',
+           'might', 'mine', 'morning', 'movie', 'music', 'must', 'my', 'new', 'night', 'no', 'not', 'now', 'old', 'on', 'or', 'our', 'ours', 'paint', 'painting', 'paper', 'park', 'pen', 'phone', 'plan', 'planning', 'play',
+           'playing', 'prepared', 'pretend', 'pretends', 'probably', 'read', 'reading', 'ready', 'road', 'room', 'run', 'running', 'sad', 'school', 'seem', 'shall', 'she', "she's", 'shop', 'should', 'sing', 'singing', 'sleep',
+           'sleeping', 'slow', 'small', 'so', 'soon', 'start', 'starting', 'still', 'student', 'study', 'studying', 'supposed', 'surely', 'swim', 'swimming', 'talk', 'talking', 'teacher', 'the', 'their', 'theirs', 'them',
+           'then', 'they', "they're", "they've", 'think', 'tired', 'to', 'today', 'tomorrow', 'train', 'travel', 'traveling', 'trying', 'us', 'village', 'walk', 'walking', 'want', 'wants', 'was', "wasn't", 'water', 'we',
+           "we're", "we've", 'were', "weren't", 'while', 'will', 'willing', 'with', "won't", 'work', 'working', 'would', 'write', 'writing', 'yes', 'yesterday', 'you', "you're", "you've", 'your', 'yours']
     vocab = list(dict.fromkeys(arr))
     vocab_size = len(vocab)
 
-    learningrate = 0.0005
+    learningrate = 0.01
     # Example input (simulate training sample)
-
     a_words = input1[inpput].split()
     input_ids = [vocab.index(word) for word in a_words]  # THIS IS `input_token_ids`
     if len(a_words) < 5:
@@ -221,7 +224,7 @@ while True:
     Layer_norm_fnn = ([LayerNormalisation(Layer_add_fnn[i], gamma1 , beta1) for i in range(len(Layer_add_fnn))])
 
     # Sentence vector & prediction
-    sentence_vector = np.mean(Layer_norm_fnn, axis=0)
+    sentence_vector = Layer_norm_fnn[-1]
     input_words = set(a_words)
 
     V1 = np.array([word_to_vec[word] for word in vocab])  # Shape: (20, d)
@@ -349,4 +352,4 @@ while True:
     #counting = counting + 1
     #print()
     #print(dl_by_dfnn_layeradd)
-    #for i in range(len(Layer_add_fnn)): layernorm_fnn_training(Layer_add_fnn[i],gamma1,beta1,dl_by_dout) 
+    #for i in range(len(Layer_add_fnn)): layernorm_fnn_training(Layer_add_fnn[i],gamma1,beta1,dl_by_dout)
